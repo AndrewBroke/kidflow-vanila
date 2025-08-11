@@ -1,0 +1,157 @@
+/* Базовая раскладка */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+.app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+
+/* Палитра */
+.palette {
+  border-right: 1px solid #e6e6e6;
+  padding: 16px;
+  background: #fafbfc;
+  overflow: auto;
+}
+.palette h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #333;
+}
+.block-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: #fff;
+  border: 1px solid #e1e4e8;
+  border-radius: 12px;
+  cursor: grab;
+  user-select: none;
+  transition: transform .06s ease, box-shadow .06s ease;
+}
+.block-btn:active { cursor: grabbing; transform: scale(0.98); }
+.block-icon { font-size: 20px; }
+.block-label { font-size: 14px; color: #222; }
+.block-type { margin-left: auto; font-size: 11px; color: #666; }
+
+/* Холст и тулбар */
+.canvas { position: relative; }
+.toolbar {
+  position: absolute;
+  z-index: 10;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,.9);
+  border: 1px solid #e6e6e6;
+  padding: 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.toolbar button {
+  border: 1px solid #d7dbe0;
+  background: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.toolbar button:hover { background: #f6f8fa; }
+
+.flow-root { height: 100%; }
+
+/* Узлы */
+.node {
+  min-width: 160px;
+  max-width: 260px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  color: #222;
+}
+.node .title {
+  font-size: 12px;
+  opacity: .7;
+  margin-bottom: 6px;
+}
+.node .editor {
+  width: 100%;
+  min-height: 32px;
+  resize: vertical;
+  border: 1px dashed rgba(0,0,0,0.15);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font: inherit;
+  background: rgba(255,255,255,0.6);
+}
+.node.start { border-radius: 20px; }
+.node.end   { border-radius: 20px; }
+
+/* Ромб (decision) */
+.node-decision-wrapper {
+  position: relative;
+  padding: 18px;                   /* внутренняя отступная рамка */
+}
+.diamond {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  background: var(--bg, #fffde7);
+  border: 1px solid rgba(0,0,0,0.08);
+  transform: rotate(45deg);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.diamond-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+.diamond-content textarea.editor {
+  width: 140px;
+  min-height: 44px;
+}
+
+/* Неброские цвета под типы */
+.node.start  { background: #E8FFE8; }
+.node.action { background: #F0F8FF; }
+.node.decision { background: transparent; }
+.node.end    { background: #FFE8E8; }
+
+/* Подписи у ручек ромба */
+.handle-label {
+  position: absolute;
+  font-size: 11px;
+  color: #555;
+  background: rgba(255,255,255,.8);
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  pointer-events: none;
+}
+
+/* Сетка фона ReactFlow чуть мягче */
+.react-flow__background {
+  opacity: .5;
+}
+
+/* Подсказка при dragover */
+.drop-hint {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  background: rgba(255,255,255,.9);
+  border: 1px dashed #d0d7de;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #666;
+  display: none;
+}
+.canvas.dragover .drop-hint { display: block; }
