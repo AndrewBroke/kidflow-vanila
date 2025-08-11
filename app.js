@@ -2,11 +2,11 @@
 // Конфигурация палитры узлов
 // =============================
 const BLOCK_TYPES = [
-  { type: 'start',    label: 'Начало',   icon: '🚦', bg: '#E8FFE8', in: false, out: true },
-  { type: 'action',   label: 'Действие', icon: '🧩', bg: '#F0F8FF', in: true,  out: true },
+  { type: 'start', label: 'Начало', icon: '🚦', bg: '#E8FFE8', in: false, out: true },
+  { type: 'action', label: 'Действие', icon: '🧩', bg: '#F0F8FF', in: true, out: true },
   // У decision два исхода — "yes" и "no"; подписи будут поставлены на рёбра
-  { type: 'decision', label: 'Условие',  icon: '🔷', bg: '#FFFBEA', in: true,  out: true, outputs: ['yes','no'] },
-  { type: 'end',      label: 'Конец',    icon: '🏁', bg: '#FFE8E8', in: true,  out: false },
+  { type: 'decision', label: 'Условие', icon: '🔷', bg: '#FFFBEA', in: true, out: true, outputs: ['yes', 'no'] },
+  { type: 'end', label: 'Конец', icon: '🏁', bg: '#FFE8E8', in: true, out: false },
 ];
 
 // Ключ для localStorage
@@ -48,8 +48,8 @@ const {
 function getTypeConfig(t) {
   return BLOCK_TYPES.find(b => b.type === t) || { type: t, label: t, bg: '#fff', in: true, out: true };
 }
-function genId(prefix='node') {
-  return `${prefix}_${Math.random().toString(36).slice(2,9)}`;
+function genId(prefix = 'node') {
+  return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 // =======================================
@@ -142,7 +142,7 @@ function App() {
   const onConnect = useCallback((params) => {
     const edgeLabel =
       params.sourceHandle === 'yes' ? 'Да' :
-      params.sourceHandle === 'no'  ? 'Нет' : '';
+        params.sourceHandle === 'no' ? 'Нет' : '';
 
     setEdges((eds) =>
       addEdge(
@@ -158,8 +158,23 @@ function App() {
     );
   }, []);
 
+  const GRID_SIZE = 20;
+  const snapToGrid = (val) => Math.round(val / GRID_SIZE) * GRID_SIZE;
+
   const onNodesChange = useCallback((changes) => {
-    setNodes((nds) => RF.applyNodeChanges(changes, nds));
+    const snappedChanges = changes.map(change => {
+      if (change.type === 'position' && change.position) {
+        return {
+          ...change,
+          position: {
+            x: snapToGrid(change.position.x),
+            y: snapToGrid(change.position.y)
+          }
+        };
+      }
+      return change;
+    });
+    setNodes((nds) => applyNodeChanges(snappedChanges, nds));
   }, []);
   const onEdgesChange = useCallback((changes) => {
     setEdges((eds) => RF.applyEdgeChanges(changes, eds));
@@ -222,16 +237,16 @@ function App() {
   }
 
   // После первого рендера отцентрировать
-useEffect(() => {
-  window.appApi = { save, load, clearAll };
-  return () => { if (window.appApi) window.appApi = null; };
-}, [/* не зависим от стейта */]);
+  useEffect(() => {
+    window.appApi = { save, load, clearAll };
+    return () => { if (window.appApi) window.appApi = null; };
+  }, [/* не зависим от стейта */]);
   // Рендер
   return h('div', {
-      style: { width: '100%', height: '100%', position: 'relative' },
-      ref: canvasRef,
-      className: 'canvas-inner',
-    },
+    style: { width: '100%', height: '100%', position: 'relative' },
+    ref: canvasRef,
+    className: 'canvas-inner',
+  },
     h('div', { className: 'drop-hint' }, 'Перетащите блок из палитры на холст'),
     h(ReactFlowCmp, {
       nodes,
