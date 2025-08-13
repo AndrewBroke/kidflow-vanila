@@ -1,38 +1,35 @@
 <!doctype html>
 <html lang="ru">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Редактор блок‑схем (ReactFlow, CDN)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flow Editor (UMD, no build)</title>
 
-    <!-- React и ReactDOM ДОЛЖНЫ грузиться первыми и синхронно -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- React и ReactDOM ДОЛЖНЫ грузиться первыми и синхронно -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-    <!-- React Flow (UMD) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/style.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/umd/index.min.js"></script>
+  <!-- React Flow (UMD) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/style.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/umd/index.min.js"></script>
 
-    <!-- Ваши стили -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Ваш код (последним) -->
-    <script src="app.js"></script>
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css">
 </head>
-
 <body>
-    <div class="app">
-        <aside class="palette" id="palette"></aside>
-        <main class="canvas">
-            <div class="toolbar">
-                <button id="saveBtn">💾 Сохранить</button>
-                <button id="loadBtn">📂 Загрузить</button>
-                <button id="clearBtn">🧹 Очистить</button>
-            </div>
-            <div id="flow-root" class="flow-root"></div>
-        </main>
-    </div>
-</body>
+  <div id="app">
+    <aside class="palette" id="palette"></aside>
+    <main class="canvas-area">
+      <div class="toolbar">
+        <button id="saveBtn" class="btn">Сохранить</button>
+        <button id="loadBtn" class="btn">Загрузить</button>
+        <span class="hint">Перетащите блок из палитры слева на холст → соединяйте стрелками</span>
+      </div>
+      <div class="flow-wrapper" id="flow-wrapper"></div>
+    </main>
+  </div>
 
+  <!-- App logic -->
+  <script src="./app.js"></script>
+</body>
 </html>
