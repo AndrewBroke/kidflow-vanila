@@ -60,18 +60,68 @@ function genId(prefix = 'node') {
 function BoxNode(props) {
   const { id, type, data, isConnectable } = props;
   const cfg = getTypeConfig(type);
+
+  const boxRef = React.useRef(null);
+  const resizingRef = React.useRef(false);
+
   const onText = (e) => data.onLabelChange(id, e.target.value);
 
-  return h('div', { className: `node ${type}`, style: { background: cfg.bg } },
-    h('div', { className: 'title' }, cfg.label),
-    cfg.in ? h(Handle, { type: 'target', position: Position.Top, isConnectable }) : null,
-    cfg.out ? h(Handle, { id: 'out', type: 'source', position: Position.Bottom, isConnectable }) : null,
+  const onGripDown = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    resizingRef.current = true;
+    data.setDragging?.(id, false);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = boxRef.current.offsetWidth;
+    const startH = boxRef.current.offsetHeight;
+
+    const onMove = (ev) => {
+      if (!resizingRef.current) return;
+      const w = Math.max(120, startW + (ev.clientX - startX));
+      const h = Math.max(60, startH + (ev.clientY - startY));
+      boxRef.current.style.width = w + 'px';
+      boxRef.current.style.height = h + 'px';
+    };
+
+    const onUp = () => {
+      resizingRef.current = false;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+
+      const w = boxRef.current.offsetWidth;
+      const h = boxRef.current.offsetHeight;
+      data.onResize?.(id, w, h);
+
+      data.setDragging?.(id, true);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp, { once: true });
+  };
+
+  return h('div', {
+    ref: boxRef,
+    className: `node ${type}`,
+    style: {
+      background: cfg.bg,
+      width: data.width ?? 160,
+      height: data.height ?? 80,
+      overflow: 'auto'
+    }
+  },
+    cfg.in && h(Handle, { type: 'target', position: Position.Top, isConnectable }),
+    cfg.out && h(Handle, { id: 'out', type: 'source', position: Position.Bottom, isConnectable }),
     h('textarea', {
-      className: 'editor',
+      className: 'editor nodrag',
       placeholder: 'Подпись...',
       value: data.label || '',
       onInput: onText,
-    })
+      onFocus: () => data.setDragging?.(id, false),
+      onBlur: () => data.setDragging?.(id, true),
+    }),
+    h('div', { className: 'rf-resize nodrag', onPointerDown: onGripDown })
   );
 }
 
@@ -79,30 +129,70 @@ function BoxNode(props) {
 function DecisionNode(props) {
   const { id, type, data, isConnectable } = props;
   const cfg = getTypeConfig(type);
+
+  const wrapRef = React.useRef(null);
+  const resizingRef = React.useRef(false);
+
+  const size = data.size ?? 120;
   const onText = (e) => data.onLabelChange(id, e.target.value);
 
-  return h('div', { className: 'node decision node-decision-wrapper' },
+  const onGripDown = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    resizingRef.current = true;
+    data.setDragging?.(id, false);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startS = size;
+
+    const onMove = (ev) => {
+      if (!resizingRef.current) return;
+      const delta = Math.max(ev.clientX - startX, ev.clientY - startY);
+      const s = Math.max(120, startS + delta);
+      wrapRef.current.style.setProperty('--sz', s + 'px');
+    };
+
+    const onUp = () => {
+      resizingRef.current = false;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      const diamond = wrapRef.current.querySelector('.diamond');
+      const rect = diamond.getBoundingClientRect();
+      const s = Math.max(rect.width, rect.height);
+      data.onResize?.(id, s, s); // width=height=size
+      data.setDragging?.(id, true);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp, { once: true });
+  };
+
+  return h('div', {
+    ref: wrapRef,
+    className: 'node decision node-decision-wrapper',
+    style: { '--sz': size + 'px' }
+  },
     h(Handle, { type: 'target', position: Position.Top, isConnectable }),
-    // diamond itself
     h('div', { className: 'diamond', style: { '--bg': cfg.bg } }),
-    // overlay content (textarea)
     h('div', { className: 'diamond-content' },
       h('div', { style: { textAlign: 'center' } },
         h('div', { className: 'title' }, cfg.label + ' (if/else)'),
         h('textarea', {
-          className: 'editor',
+          className: 'editor nodrag',
           placeholder: 'Условие...',
           value: data.label || '',
           onInput: onText,
+          onFocus: () => data.setDragging?.(id, false),
+          onBlur: () => data.setDragging?.(id, true),
         })
       )
     ),
-    // yes (right)
     h(Handle, { id: 'yes', type: 'source', position: Position.Right, isConnectable }),
     h('div', { className: 'handle-label', style: { right: -8, top: '50%', transform: 'translate(100%,-50%)' } }, 'Да'),
-    // no (bottom)
     h(Handle, { id: 'no', type: 'source', position: Position.Bottom, isConnectable }),
     h('div', { className: 'handle-label', style: { left: '50%', bottom: -8, transform: 'translate(-50%, 100%)' } }, 'Нет'),
+    h('div', { className: 'rf-resize nodrag', onPointerDown: onGripDown })
   );
 }
 
@@ -126,7 +216,14 @@ function App() {
       id: genId('start'),
       type: 'start',
       position: { x: 0, y: 0 },
-      data: { label: 'Старт урока', onLabelChange: handleLabelChange },
+      data: {
+        label: 'Старт урока',
+        width: 160,
+        height: 80,
+        onLabelChange: handleLabelChange,
+        onResize: handleResize,
+        setDragging: setDragging
+      }
     }];
   });
   const [edges, setEdges] = useState([]);
@@ -136,6 +233,44 @@ function App() {
 
   function handleLabelChange(id, text) {
     setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, label: text, onLabelChange: handleLabelChange } } : n));
+  }
+
+  function handleResize(id, width, height) {
+    setNodes(nds => nds.map(n => {
+      if (n.id !== id) return n;
+      if (n.type === 'decision') {
+        const size = Math.max(width, height);
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            size,
+            width: size,
+            height: size,
+            onLabelChange: handleLabelChange,
+            onResize: handleResize,
+            setDragging: setDragging
+          }
+        };
+      }
+      return {
+        ...n,
+        data: {
+          ...n.data,
+          width,
+          height,
+          onLabelChange: handleLabelChange,
+          onResize: handleResize,
+          setDragging: setDragging
+        }
+      };
+    }));
+  }
+
+  function setDragging(id, canDrag) {
+    setNodes(nds => nds.map(n =>
+      n.id === id ? { ...n, draggable: canDrag } : n
+    ));
   }
 
   // Подключение рёбер: автоматически ставим стрелки и подписи для decision (yes/no)
@@ -204,7 +339,14 @@ function App() {
         id,
         type,
         position: pos,
-        data: { label: '', onLabelChange: handleLabelChange },
+        data: {
+          label: '',
+          width: 160,
+          height: 80,
+          onLabelChange: handleLabelChange,
+          onResize: handleResize,
+          setDragging: setDragging
+        },
       })
     );
   }, [rf]);

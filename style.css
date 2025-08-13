@@ -96,8 +96,8 @@ html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Seg
   padding: 18px;                   /* внутренняя отступная рамка */
 }
 .diamond {
-  width: 120px;
-  height: 120px;
+  width: var(--sz, 120px);
+  height: var(--sz, 120px);
   margin: 0 auto;
   background: var(--bg, #fffde7);
   border: 1px solid rgba(0,0,0,0.08);
@@ -155,3 +155,24 @@ html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Seg
   display: none;
 }
 .canvas.dragover .drop-hint { display: block; }
+
+/* узел — относительное позиционирование, чтобы положить хвостик */
+.node { position: relative; }
+
+/* собственный уголок-резайзер в правом нижнем углу */
+.rf-resize {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid #cbd5e1;
+  background:
+    linear-gradient(135deg, transparent 0 50%, #cbd5e1 50% 100%),
+    linear-gradient(135deg, transparent 0 70%, #cbd5e1 70% 100%);
+  cursor: se-resize;
+}
+
+/* элементы с этим классом не инициируют drag у React Flow */
+.nodrag { pointer-events: auto; }
