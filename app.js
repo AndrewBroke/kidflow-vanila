@@ -213,6 +213,8 @@ function App() {
       id,
       type: 'block',                 // все узлы одного компонента
       position,
+      sourcePosition: (cfg.out === true ? Position.Bottom : undefined),
+      targetPosition: (cfg.in ? Position.Top : undefined),
       style: { width: cfg.minW, height: cfg.minH, background: cfg.bg, minWidth: cfg.minW, minHeight: cfg.minH },
       draggable: true,
       data: {
@@ -282,6 +284,7 @@ function App() {
 
     setEdges((eds) => addEdge({
       ...params,
+      type: "smoothstep",
       markerEnd: { type: MarkerType.ArrowClosed },
       label
     }, eds));
@@ -339,7 +342,11 @@ function App() {
       snapGrid: [16, 16],
       onInit: setRf,
       fitView: false,
-      defaultEdgeOptions: { markerEnd: { type: MarkerType.ArrowClosed } }
+      defaultEdgeOptions: {
+        type: 'smoothstep',                            // ← важно
+        markerEnd: { type: MarkerType.ArrowClosed },
+        style: { strokeWidth: 2 }
+      }
     },
       R.createElement(Background, { gap: 16, size: 1 }),
       R.createElement(Controls, null),
