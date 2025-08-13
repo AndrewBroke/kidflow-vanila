@@ -1,16 +1,16 @@
 // === Config: блоки и их дефолтные параметры (расширяемость через одну константу) ===
 const BLOCK_TYPES = [
-  { type: 'start',    label: 'Начало',   icon: '🚦', bg: '#E8FFE8', in: false, out: true,        resizable: true, minW: 160, minH: 64 },
-  { type: 'action',   label: 'Действие', icon: '🧩', bg: '#FFF7D6', in: true,  out: true,        resizable: true, minW: 180, minH: 72 },
-  { type: 'decision', label: 'Условие',  icon: '❓', bg: '#E6F0FF', in: true,  out: 'yes/no',    resizable: true, minW: 200, minH: 120 },
-  { type: 'end',      label: 'Конец',    icon: '🏁', bg: '#FFE0E0', in: true,  out: false,       resizable: true, minW: 160, minH: 64 },
+  { type: 'start', label: 'Начало', icon: '🚦', bg: '#E8FFE8', in: false, out: true, resizable: true, minW: 160, minH: 64 },
+  { type: 'action', label: 'Действие', icon: '🧩', bg: '#FFF7D6', in: true, out: true, resizable: true, minW: 180, minH: 72 },
+  { type: 'decision', label: 'Условие', icon: '❓', bg: '#E6F0FF', in: true, out: 'yes/no', resizable: true, minW: 200, minH: 120 },
+  { type: 'end', label: 'Конец', icon: '🏁', bg: '#FFE0E0', in: true, out: false, resizable: true, minW: 160, minH: 64 },
 ];
 // Быстрый доступ по типу
 const TYPE_MAP = Object.fromEntries(BLOCK_TYPES.map(b => [b.type, b]));
 
 // === Утилиты ===
 const q = (v) => Math.round(v / 16) * 16; // привязка к сетке 16px
-const uid = (() => { let i = 1; return (p='n') => `${p}-${i++}`; })();
+const uid = (() => { let i = 1; return (p = 'n') => `${p}-${i++}`; })();
 const STORAGE_KEY = 'flow_v1';
 
 // === Палитра слева (чистый DOM, DnD-источник) ===
@@ -124,16 +124,16 @@ function BlockNode(props) {
   // Визуальная «ромб» вставка для decision
   const decisionDecor = data.kind === 'decision'
     ? R.createElement('div', { className: 'decision-wrap' },
-        R.createElement('div', { className: 'decision-shape' })
-      )
+      R.createElement('div', { className: 'decision-shape' })
+    )
     : null;
 
   // Лейблы «Да/Нет» внизу
   const yesNoLabels = data.kind === 'decision' && outKind === 'yes/no'
     ? R.createElement('div', { className: 'handle-labels' },
-        R.createElement('span', null, 'Да'),
-        R.createElement('span', null, 'Нет')
-      )
+      R.createElement('span', null, 'Да'),
+      R.createElement('span', null, 'Нет')
+    )
     : null;
 
   // Хендлы
@@ -196,7 +196,7 @@ function App() {
   }, [setNodes]);
 
   const updateNodeSize = R.useCallback((id, size) => {
-    setNodes((nds) => nds.map(n => n.id === id ? { ...n, style: { ...(n.style||{}), width: size.width, height: size.height } } : n));
+    setNodes((nds) => nds.map(n => n.id === id ? { ...n, style: { ...(n.style || {}), width: size.width, height: size.height } } : n));
   }, [setNodes]);
 
   const setNodeDraggable = R.useCallback((id, value) => {
@@ -233,7 +233,7 @@ function App() {
     return nodes.map(n => ({
       ...n,
       data: {
-        ...(n.data||{}),
+        ...(n.data || {}),
         updateLabel,
         updateNodeSize,
         setNodeDraggable
@@ -245,7 +245,7 @@ function App() {
   R.useEffect(() => {
     if (nodes.length === 0 && rf) {
       const center = rf.project({ x: 400, y: 220 });
-      setNodes([ makeNodeFromType('start', center) ]);
+      setNodes([makeNodeFromType('start', center)]);
       // Немного позже подстроиться по виду
       setTimeout(() => rf.fitView({ padding: 0.2 }), 0);
     }
@@ -278,7 +278,7 @@ function App() {
     // подпись ребра в зависимости от sourceHandle у decision
     let label;
     if (params.sourceHandle === 'yes') label = 'Да';
-    if (params.sourceHandle === 'no')  label = 'Нет';
+    if (params.sourceHandle === 'no') label = 'Нет';
 
     setEdges((eds) => addEdge({
       ...params,
@@ -291,17 +291,17 @@ function App() {
   function save() {
     const payload = { nodes, edges };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    alert('Схема сохранена в localStorage ('+STORAGE_KEY+').');
+    alert('Схема сохранена в localStorage (' + STORAGE_KEY + ').');
   }
   function load() {
     const txt = localStorage.getItem(STORAGE_KEY);
     if (!txt) { alert('Нет сохранённой схемы.'); return; }
-    try{
+    try {
       const { nodes: n, edges: e } = JSON.parse(txt);
       setNodes(hydrate(n || []));
       setEdges(e || []);
       setTimeout(() => rf && rf.fitView({ padding: 0.2 }), 0);
-    }catch(err){
+    } catch (err) {
       console.error(err);
       alert('Ошибка загрузки схемы.');
     }
