@@ -1,6 +1,6 @@
 :root {
   --grid: 16px;
-  --border: 3px solid #222;
+  --border: 2px solid #c0c0c0a8;
   --radius: 12px;
   --text: #222;
   --muted: #6b7280;
@@ -223,4 +223,5 @@ body {
 .react-flow__node-block {
   min-width: 200px !important;
   min-height: 100px !important;
+  border-radius: var(--radius);
 }
