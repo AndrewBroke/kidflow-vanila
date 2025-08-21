@@ -1,9 +1,9 @@
 // === Config: блоки и их дефолтные параметры (расширяемость через одну константу) ===
 const BLOCK_TYPES = [
-  { type: 'start', label: 'Начало', icon: '🚦', bg: '#E8FFE8', in: false, out: true, resizable: true, minW: 160, minH: 64 },
-  { type: 'action', label: 'Действие', icon: '🧩', bg: '#FFF7D6', in: true, out: true, resizable: true, minW: 180, minH: 72 },
-  { type: 'decision', label: 'Условие', icon: '❓', bg: '#E6F0FF', in: true, out: 'yes/no', resizable: true, minW: 200, minH: 120 },
-  { type: 'end', label: 'Конец', icon: '🏁', bg: '#FFE0E0', in: true, out: false, resizable: true, minW: 160, minH: 64 },
+  { type: 'start', label: 'Начало', icon: '🚦', bg: '#3a5287', in: false, out: true, resizable: true, minW: 160, minH: 64 },
+  { type: 'action', label: 'Действие', icon: '🧩', bg: '#5221b3', in: true, out: true, resizable: true, minW: 180, minH: 72 },
+  { type: 'decision', label: 'Условие', icon: '❓', bg: '#7c2392', in: true, out: 'yes/no', resizable: true, minW: 200, minH: 120 },
+  { type: 'end', label: 'Конец', icon: '🏁', bg: '#12981c', in: true, out: false, resizable: true, minW: 160, minH: 64 },
 ];
 // Быстрый доступ по типу
 const TYPE_MAP = Object.fromEntries(BLOCK_TYPES.map(b => [b.type, b]));
@@ -350,7 +350,18 @@ function App() {
     },
       R.createElement(Background, { gap: 16, size: 1 }),
       R.createElement(Controls, null),
-      R.createElement(MiniMap, null)
+      R.createElement(MiniMap, {
+        // фон самой миникарты
+        style: { backgroundColor: '#0f172a', borderRadius: 8 },
+
+        // цвет «маски» вокруг видимой области (затенение)
+        maskColor: 'rgba(38, 76, 188, 0.35)',
+
+        // цвет заливки и обводки прямоугольничков узлов в миникарте
+        nodeColor: (n) => n.style?.background || (TYPE_MAP[n.data?.kind]?.bg ?? '#9ca3af'),
+        nodeStrokeColor: '#111827',
+        nodeStrokeWidth: 1.5,
+      })
     )
   );
 }
